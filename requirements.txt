@@ -26,3 +26,8 @@ PyYAML==5.4.1
 torch_complex
 espnet
 PyWavelets
+typer
+pydantic
+fastapi
+loguru
+click==8.0.4

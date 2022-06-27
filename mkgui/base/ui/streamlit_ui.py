@@ -845,9 +845,6 @@ def render_streamlit_ui() -> None:
     col2.title(title)
     col2.markdown("欢迎使用MockingBird Web 2")
 
-    image = Image.open('.\\mkgui\\static\\mb.png')
-    col1.image(image)
-
     st.markdown("---")
     left, right = st.columns([0.4, 0.6])
 
