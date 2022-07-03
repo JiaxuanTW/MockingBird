@@ -13,10 +13,11 @@ import time
 import torch
 
 
-def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_truth: bool,
-          save_every: int, backup_every: int, force_restart: bool):
+def train(run_id: str, vocoder_type: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_truth: bool,
+          save_every: int, backup_every: int, force_restart: bool, config:str):
     # Check to make sure the hop length is correctly factorised
     assert np.cumprod(hp.voc_upsample_factors)[-1] == hp.hop_length
+    torch.backends.cudnn.enabled = False
     
     # Instantiate the model
     print("Initializing the model...")

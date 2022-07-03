@@ -59,7 +59,7 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
     metadata_fpath = in_dir.joinpath("train.txt")
     mel_dir = in_dir.joinpath("mels")
     embed_dir = in_dir.joinpath("embeds")
-    num_workers = 0 if sys.platform.startswith("win") else 2;
+    num_workers = 0 if sys.platform.startswith("win") else 2
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
     data_loader = DataLoader(dataset,
                              collate_fn=lambda batch: collate_synthesizer(batch),
@@ -70,7 +70,7 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
 
     # Generate GTA mels
     meta_out_fpath = Path(out_dir).joinpath("synthesized.txt")
-    with open(meta_out_fpath, "w") as file:
+    with open(meta_out_fpath, "w", encoding='UTF-8') as file:
         for i, (texts, mels, embeds, idx) in tqdm(enumerate(data_loader), total=len(data_loader)):
             texts = texts.to(device)
             mels = mels.to(device)

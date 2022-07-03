@@ -3,8 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import json
 import torch
-from utils.util import AttrDict
-from vocoder.fregan.generator import FreGAN
+from ...utils.util import AttrDict
+from .generator import FreGAN
 
 generator = None       # type: FreGAN
 output_sample_rate = None

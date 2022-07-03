@@ -3,8 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import json
 import torch
-from utils.util import AttrDict
-from vocoder.hifigan.models import Generator
+from ...utils.util import AttrDict
+from .models import Generator
 
 generator = None       # type: Generator
 output_sample_rate = None     

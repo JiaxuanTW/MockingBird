@@ -148,7 +148,8 @@ class MelDataset(torch.utils.data.Dataset):
                                   self.sampling_rate, self.hop_size, self.win_size, self.fmin, self.fmax,
                                   center=False)
         else:
-            mel_path = os.path.join(self.base_mels_path, "mel" + "-" + filename.split("/")[-1].split("-")[-1])
+            # TODO : filename can't contain '-' character
+            mel_path = os.path.join(self.base_mels_path, "mel" + "-" + filename.split("/", 1)[-1].split("-")[-1])
             mel = np.load(mel_path).T
             # mel = np.load(
             #     os.path.join(self.base_mels_path, os.path.splitext(os.path.split(filename)[-1])[0] + '.npy'))

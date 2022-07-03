@@ -1,15 +1,15 @@
 import torch
-from synthesizer import audio
-from synthesizer.hparams import hparams
-from synthesizer.models.tacotron import Tacotron
-from synthesizer.utils.symbols import symbols
-from synthesizer.utils.text import text_to_sequence
-from vocoder.display import simple_table
+from . import audio
+from .hparams import hparams
+from .models.tacotron import Tacotron
+from .utils.symbols import symbols
+from .utils.text import text_to_sequence
+from ..vocoder.display import simple_table
 from pathlib import Path
 from typing import Union, List
 import numpy as np
 import librosa
-from utils import logmmse
+from ..utils import logmmse
 import json
 from pypinyin import lazy_pinyin, Style
 
@@ -17,7 +17,7 @@ class Synthesizer:
     sample_rate = hparams.sample_rate
     hparams = hparams
     
-    def __init__(self, model_fpath: Path, verbose=True):
+    def __init__(self, model_fpath: Path, model_config_fpath: Path, verbose=True):
         """
         The model isn't instantiated and loaded in memory until needed or until load() is called.
         
@@ -25,6 +25,7 @@ class Synthesizer:
         :param verbose: if False, prints less information when using the model
         """
         self.model_fpath = model_fpath
+        self.model_config_fpath = model_config_fpath
         self.verbose = verbose
  
         # Check for GPU
@@ -46,9 +47,8 @@ class Synthesizer:
     
     def load(self):
         # Try to scan config file
-        model_config_fpaths = list(self.model_fpath.parent.rglob("*.json"))
-        if len(model_config_fpaths)>0 and model_config_fpaths[0].exists():
-            with model_config_fpaths[0].open("r", encoding="utf-8") as f:
+        if self.model_config_fpath.exists():
+            with self.model_config_fpath.open("r", encoding="utf-8") as f:
                 hparams.loadJson(json.load(f))
         """
         Instantiates and loads the model given the weights file that was passed in the constructor.
