@@ -3,7 +3,6 @@ from .synthesizer.inference import Synthesizer
 from .vocoder.wavernn import inference as rnn_vocoder
 from .vocoder.hifigan import inference as gan_vocoder
 from .vocoder.fregan import inference as fgan_vocoder
-from pathlib import Path
 
 import numpy as np
 import torch
@@ -11,26 +10,21 @@ import re
 import os
 from pathlib import Path
 from scipy.io.wavfile import write
-from typing import List
+from typing import Dict
 
 import matplotlib.pyplot as plt
 
 ROOT = "mockingbird/"
-# Constants
-AUDIO_SAMPLES_DIR = ROOT+"static/samples"
-ENC_MODELS_DIR = ROOT+"static/model/encoder"
-SYN_MODELS_DIR = ROOT+"static/model/synthesizer"
-VOC_MODELS_DIR = ROOT+"static/model/vocoder"
+# Path of model
+ENC_MODELS_DIR = ROOT+"model/encoder"
+SYN_MODELS_DIR = ROOT+"model/synthesizer"
+VOC_MODELS_DIR = ROOT+"model/vocoder"
 # Path of inference wav
-TEMP_FOLDER = ROOT+"static/temp"
-TEMP_SOURCE_AUDIO = ROOT+"static/temp/temp_source.wav"
-TEMP_RESULT_AUDIO = ROOT+"static/temp/temp_result.wav"
+TEMP_FOLDER = "static/temp"
+TEMP_SOURCE_AUDIO = "static/temp/temp_source.wav"
+TEMP_RESULT_AUDIO = "static/temp/temp_result.wav"
 
-# Load local sample audio as options
-if os.path.isdir(AUDIO_SAMPLES_DIR):
-    audio_input_selection = {}
-    for file in Path(AUDIO_SAMPLES_DIR).glob("*.wav"):
-        audio_input_selection[file.name] = Path(file)
+
 # Pre-Load models
 if os.path.isdir(SYN_MODELS_DIR):
     synthesizers = {}
@@ -109,20 +103,46 @@ def plot_embed(embed, name="noName") -> None:
     # plt.show()
 
 
-def get_audios() -> List[str]:
-    return list(audio_input_selection)
-
-
-def get_encoders() -> List[str]:
+def get_encoders() -> Dict[str, Path]:
     return encoders
 
 
-def get_synthesizers() -> List[str]:
+def get_synthesizers() -> Dict[str, Path]:
     return synthesizers
 
 
-def get_vocoder() -> List[str]:
+def get_vocoder() -> Dict[str, Path]:
     return vocoders
+
+
+def synthesize_voice(speaker_path: Path,
+                     encoder: str,
+                     synthesizer: str,
+                     vocoder: str,
+                     text: str = '大家好，很高興在今天的會議上見到大家'
+                     ) -> None:
+    encoder_path = get_encoders()[encoder]
+    synthesizer_path = get_synthesizers()[synthesizer]
+    vocoder_path = get_vocoder()[vocoder]
+    fname = speaker_path.name.split('.')[0]
+
+    wav, spec, embed = embed_extract(speaker_path, encoder_path)
+    plot_spec(spec, fname)
+    plot_embed(embed, fname)
+    write(
+        TEMP_SOURCE_AUDIO, 16000, wav.astype(np.float32)
+    )  # Make sure we get the correct wav
+
+    generate = Mockingbird()
+    generate.init_model(encoder_path, synthesizer_path, vocoder_path)
+    embed_wav, spec, embed = generate.synthesize(
+        synthesizer_path, vocoder_path, text, embed)
+    plot_spec(spec, f"output-{fname}")
+    plot_embed(embed, f"output-{fname}")
+    write(
+        TEMP_RESULT_AUDIO, generate.sample_rate, embed_wav.astype(
+            np.float32)
+    )  # Make sure we get the correct wav
 
 
 class Mockingbird:
