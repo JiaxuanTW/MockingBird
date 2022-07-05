@@ -124,11 +124,11 @@ def synthesize_voice(speaker_path: Path,
     encoder_path = get_encoders()[encoder]
     synthesizer_path = get_synthesizers()[synthesizer]
     vocoder_path = get_vocoder()[vocoder]
-    fname = speaker_path.name.split('.')[0]
+    fname = speaker_path.name.split('.')[0] # set plot image path name
 
     wav, spec, embed = embed_extract(speaker_path, encoder_path)
-    plot_spec(spec, fname)
-    plot_embed(embed, fname)
+    plot_spec(spec, "temp_input")
+    plot_embed(embed, "temp_input")
     write(
         TEMP_SOURCE_AUDIO, 16000, wav.astype(np.float32)
     )  # Make sure we get the correct wav
@@ -137,8 +137,8 @@ def synthesize_voice(speaker_path: Path,
     generate.init_model(encoder_path, synthesizer_path, vocoder_path)
     embed_wav, spec, embed = generate.synthesize(
         synthesizer_path, vocoder_path, text, embed)
-    plot_spec(spec, f"output-{fname}")
-    plot_embed(embed, f"output-{fname}")
+    plot_spec(spec, "temp_output")
+    plot_embed(embed, "temp_output")
     write(
         TEMP_RESULT_AUDIO, generate.sample_rate, embed_wav.astype(
             np.float32)
@@ -230,8 +230,10 @@ class Mockingbird:
         if self.synthesizer is None or self.seed is not None:
             self.init_synthesizer(synthesizer_path)
 
-        punctuation = "[！，。、,？]"  # punctuate and split/clean text
+        punctuation = "[！，。、,?]"  # punctuate and split/clean text
         texts = re.split(punctuation, texts)
+        while '' in texts:
+            texts.remove('')
         s_embed = embed
         s_embeds = [s_embed] * len(texts)
         min_token = max_length  # 句子長度
