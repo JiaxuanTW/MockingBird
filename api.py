@@ -160,7 +160,7 @@ class Mockingbird:
         synthesize: load text and target embed to generate fake voice of target
     """
 
-    def __init__(self, vocoder=rnn_vocoder, seed=4234) -> None:
+    def __init__(self, vocoder=rnn_vocoder, seed=5678) -> None:
         self.synthesizer = None
         self.sample_rate = None
         self.vocoder = vocoder
