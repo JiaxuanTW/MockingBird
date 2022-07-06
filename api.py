@@ -230,7 +230,7 @@ class Mockingbird:
         if self.synthesizer is None or self.seed is not None:
             self.init_synthesizer(synthesizer_path)
 
-        punctuation = "[！，。、,?]"  # punctuate and split/clean text
+        punctuation = "[！，。、,?「」]"  # punctuate and split/clean text
         texts = re.split(punctuation, texts)
         while '' in texts:
             texts.remove('')
