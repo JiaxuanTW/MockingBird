@@ -467,7 +467,7 @@ class Tacotron(nn.Module):
         # The projection avoids unnecessary matmuls in the decoder loop
         encoder_seq = self.encoder(x, speaker_embedding)
 
-        # put after encoder 
+        # put after encoder (MockingBird Global Style Token)
         if hparams.use_gst and self.gst is not None:
             if style_idx >= 0 and style_idx < 10:
                 query = torch.zeros(1, 1, self.gst.stl.attention.num_units)

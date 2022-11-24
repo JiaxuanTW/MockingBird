@@ -3,6 +3,7 @@ from . import audio
 from .hparams import hparams
 from .models.tacotron import Tacotron
 from .utils.symbols import symbols
+from .utils.plot import plot_alignment
 from .utils.text import text_to_sequence
 from ..vocoder.display import simple_table
 from pathlib import Path
@@ -99,7 +100,8 @@ class Synthesizer:
                         ("r", self._model.r)])
         
         print("Read " + str(texts))
-        texts = [" ".join(lazy_pinyin(v, style=Style.TONE3, neutral_tone_with_five=True)) for v in texts]
+        # texts = [" ".join(lazy_pinyin(v, style=Style.TONE3, neutral_tone_with_five=True)) for v in texts]
+        texts = [" ".join(lazy_pinyin(v, style=Style.BOPOMOFO, neutral_tone_with_five=True)) for v in texts]
         print("Synthesizing " + str(texts))
         # Preprocess text inputs
         inputs = [text_to_sequence(text, hparams.tts_cleaner_names) for text in texts]
@@ -111,6 +113,7 @@ class Synthesizer:
                              for i in range(0, len(inputs), hparams.synthesis_batch_size)]
         batched_embeds = [embeddings[i:i+hparams.synthesis_batch_size]
                              for i in range(0, len(embeddings), hparams.synthesis_batch_size)]
+        
 
         specs = []
         for i, batch in enumerate(batched_inputs, 1):
@@ -132,6 +135,9 @@ class Synthesizer:
 
             # Inference
             _, mels, alignments = self._model.generate(chars, speaker_embeddings, style_idx=style_idx, min_stop_token=min_stop_token, steps=steps)
+            for i in range(len(alignments)):
+                plot_alignment(alignments[i].detach().cpu().numpy(), f'static/temp/alignmet{i}.png')
+            
             mels = mels.detach().cpu().numpy()
             for m in mels:
                 # Trim silence from end of each spectrogram

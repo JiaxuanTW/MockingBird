@@ -83,7 +83,9 @@ def plot_spec(spec, name="noName") -> None:
     plt.figure(figsize=(10, 2))
     plt.axis("off")
     plt.imshow(spec, aspect="auto", interpolation="none")
-    plt.savefig(f'{TEMP_FOLDER}/spec-{name}.png', transparent=True)
+    plt.savefig(f'{TEMP_FOLDER}/spec-{name}.png', transparent=True, dpi=300, bbox_inches='tight',
+                pad_inches=0)
+    # plt.imsave(f'{TEMP_FOLDER}/spec-{name}.png',spec, dpi=300)
     # plt.show()
 
 
@@ -124,7 +126,7 @@ def synthesize_voice(speaker_path: Path,
     encoder_path = get_encoders()[encoder]
     synthesizer_path = get_synthesizers()[synthesizer]
     vocoder_path = get_vocoder()[vocoder]
-    fname = speaker_path.name.split('.')[0] # set plot image path name
+    fname = speaker_path.name.split('.')[0]  # set plot image path name
 
     wav, spec, embed = embed_extract(speaker_path, encoder_path)
     plot_spec(spec, "temp_input")
@@ -133,7 +135,8 @@ def synthesize_voice(speaker_path: Path,
         TEMP_SOURCE_AUDIO, 16000, wav.astype(np.float32)
     )  # Make sure we get the correct wav
 
-    generate = Mockingbird()
+    seed_num = np.random.randint(0, 9999)
+    generate = Mockingbird(seed=seed_num)
     generate.init_model(encoder_path, synthesizer_path, vocoder_path)
     embed_wav, spec, embed = generate.synthesize(
         synthesizer_path, vocoder_path, text, embed)
@@ -204,8 +207,8 @@ class Mockingbird:
         vocoder_path: Path,
         texts: str,
         embed,
-        max_length=2,
-        style=0,
+        max_length=4,
+        style=-1,
         steps=2000,
     ):
         """
@@ -230,7 +233,7 @@ class Mockingbird:
         if self.synthesizer is None or self.seed is not None:
             self.init_synthesizer(synthesizer_path)
 
-        punctuation = "[！，。、,?「」]"  # punctuate and split/clean text
+        punctuation = "[！，。、,?「」：；？]"  # punctuate and split/clean text
         texts = re.split(punctuation, texts)
         while '' in texts:
             texts.remove('')
